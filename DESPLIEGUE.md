@@ -30,10 +30,14 @@ Orden: dominio → Neon → Render → Cloudflare Pages → conectar `api.` con 
    - **Postgres version:** 17 o la más reciente
    - **Region:** `AWS US East (N. Virginia)` (la misma zona que Render en el paso 2, para que
      el backend y la base estén cerca).
-2. En el proyecto, crea una base llamada **`cleon`** (Databases → New database, dueño `neondb_owner`).
-3. En **Connect**, elige la base `cleon`, el rol `neondb_owner` y copia la cadena de conexión
-   (`postgresql://neondb_owner:...@ep-xxxx.us-east-1.aws.neon.tech/cleon?sslmode=require`).
-   Es la llave maestra de la base: guárdala en tu gestor de contraseñas.
+2. La base se llama **`cleon`** (se puede poner en *Database name* al crear el proyecto). Neon
+   crea un rol dueño con el nombre de la base (`cleon_owner`) o `neondb_owner`: cualquiera sirve.
+3. En **Connect**, elige la base `cleon` y el rol dueño, **apaga "Connection pooling"** (el host no
+   debe llevar `-pooler`: el pooler no conserva la variable de sesión que usa la seguridad por
+   filas) y copia la cadena con **Show password**
+   (`postgresql://cleon_owner:...@ep-xxxx.us-east-1.aws.neon.tech/cleon?sslmode=require`).
+   Es la llave maestra de la base: guárdala en tu gestor de contraseñas y no la pegues en chats
+   ni capturas. Si se expone: Roles → ⋮ → Reset password.
 4. Genera una contraseña para `cleon_app` (el rol con el que se conecta el backend).
    En PowerShell:
    ```powershell
@@ -43,10 +47,16 @@ Orden: dominio → Neon → Render → Cloudflare Pages → conectar `api.` con 
 5. Desde la carpeta del proyecto, crea las tablas, la seguridad y el admin. En cada comando
    reemplaza `CADENA_NEON` por la cadena del paso 3 (entre comillas):
    ```powershell
-   psql "CADENA_NEON" -f db/schema.sql
-   psql "CADENA_NEON" -v app_password='CONTRASENA_CLEON_APP' -f db/seguridad.sql
-   psql "CADENA_NEON" -f db/admin.sql
+   $neon = 'CADENA_NEON'   # comillas simples: la cadena lleva '&'
+   psql $neon -f db/schema.sql
+   psql $neon -v app_password='CONTRASENA_CLEON_APP' -f db/seguridad.sql
+   psql $neon -f db/admin.sql
    ```
+   Si la ruta del proyecto tiene tildes y `psql -f` no abre el archivo, copia los 3 scripts a
+   una carpeta sin tildes (por ejemplo `$HOME\cleon-db`).
+
+   Para cambiar después la contraseña de `cleon_app`: en Neon, **SQL Editor** (base `cleon`),
+   `ALTER ROLE cleon_app WITH PASSWORD '...';` y pon la misma en `CLEON_DB_PASSWORD` de Render.
    El último pide la contraseña del admin **de producción** (mínimo 16 caracteres, con
    mayúsculas, minúsculas, números y símbolos). Usa una distinta a la del PC.
 
