@@ -1,7 +1,11 @@
 package com.sebast.comercializados_leon.Service;
 
 import java.math.BigDecimal;
+import java.text.Collator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,8 +62,21 @@ public class ClienteService {
                 .toList();
     }
 
+    // Ciudades donde ya hay clientes, sin repetir (sin importar mayusculas o tildes
+    // distintas: "Medellin" y "medellin" salen una sola vez) y en orden alfabetico.
+    public List<String> listarCiudades() {
+        Collator orden = Collator.getInstance(Locale.forLanguageTag("es-CO"));
+        orden.setStrength(Collator.PRIMARY);
+        Map<String, String> unicas = new LinkedHashMap<>();
+        for (String ciudad : clienteRepository.ciudadesConClientes()) {
+            unicas.putIfAbsent(Sanitizador.claveSinTildes(ciudad), ciudad);
+        }
+        return unicas.values().stream().sorted(orden).toList();
+    }
+
     public ClienteDTO crear(ClienteDTO dto){
         Cliente cliente = new Cliente();
+        cliente.setNivelPrecio(1);
         aplicarDTOaEntity(dto, cliente);
         Cliente guardado = clienteRepository.save(cliente);
         // Un cliente nuevo arranca en 0, asi que nunca puede ser destacado todavia:
@@ -121,6 +138,11 @@ public class ClienteService {
         cliente.setNit(dto.getNit());
         cliente.setTelefono(dto.getTelefono());
         cliente.setEmail(dto.getEmail());
+        cliente.setCiudad(dto.getCiudad());
+        // Sin nivel en el DTO se deja el que tenia (1 si es nuevo).
+        if (dto.getNivelPrecio() != null) {
+            cliente.setNivelPrecio(dto.getNivelPrecio());
+        }
     }
 
     private ClienteDTO aDTO(Cliente cliente, Set<Long> idsDestacados){
@@ -130,6 +152,8 @@ public class ClienteService {
             cliente.getNit(),
             cliente.getTelefono(),
             cliente.getEmail(),
+            cliente.getCiudad(),
+            cliente.getNivelPrecio(),
             cliente.getTotalCompras(),
             idsDestacados.contains(cliente.getId())
         );

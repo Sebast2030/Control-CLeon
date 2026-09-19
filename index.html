@@ -119,6 +119,23 @@
           <a href="#/facturacion/historial" class="nav-sublink" data-route="facturacion-historial">Historial</a>
         </div>
       </div>
+
+      <!-- Grupo: Camion (su inventario es parte del general) -->
+      <div class="nav-group" data-group="camion">
+        <button type="button" class="nav-group-toggle" data-toggle="camion">
+          <span class="icon" data-icon="truck"></span> Camión
+          <span class="icon nav-group-chevron" data-icon="chevron"></span>
+        </button>
+        <div class="nav-group-body">
+          <a href="#/camion/inventario" class="nav-sublink" data-route="camion-inventario">Inventario del camión</a>
+          <a href="#/camion/ventas" class="nav-sublink" data-route="camion-ventas">Ventas del camión</a>
+        </div>
+      </div>
+
+      <!-- Bodega: inventario aparte, no se factura -->
+      <a href="#/bodega" class="nav-item-single" data-route="bodega">
+        <span class="icon" data-icon="warehouse"></span> Bodega
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -130,6 +147,7 @@
         <span class="icon" data-icon="logout"></span> Cerrar sesión
       </button>
       <span id="api-status" class="api-status">Verificando conexión…</span>
+      <span class="sidebar-credit">App hecha por: Sebastian Quintero</span>
     </div>
   </aside>
 

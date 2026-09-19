@@ -41,4 +41,19 @@ public class Producto {
     @Column
     private String marca;
 
+    // Parte del stock general que va cargada en el camion. NO es un inventario aparte:
+    // esas unidades siguen contando en stock, por eso nunca puede ser mayor que stock
+    // (la base lo exige con un CHECK). Vender desde el camion descuenta de los dos.
+    @Column(name = "stock_camion", nullable = false)
+    private Integer stockCamion = 0;
+
+    // Inventario de bodega: independiente del general y no se puede facturar.
+    @Column(name = "stock_bodega", nullable = false)
+    private Integer stockBodega = 0;
+
+    // Unidades del stock general que estan en el local (lo que se vende desde "General").
+    public int stockEnLocal() {
+        return stock - stockCamion;
+    }
+
 }

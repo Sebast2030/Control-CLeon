@@ -125,6 +125,8 @@ página, pero el backend la rechaza (CORS). Es a propósito.
 `git push` a `main` → Render y Cloudflare Pages vuelven a publicar solos en unos minutos.
 Si el cambio toca la estructura de las tablas, corre primero el script SQL en Neon (como en el
 paso 1.5) y después haz push: con `ddl-auto=validate` el backend no arranca si las tablas no coinciden.
+Por ejemplo, para la versión con camión, bodega, listas de precios y abonos:
+`psql $neon -f db/migracion_camion_bodega_abonos.sql` (se puede correr varias veces sin problema).
 
 ## Si cambias el dominio
 

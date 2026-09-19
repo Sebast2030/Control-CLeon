@@ -1,18 +1,30 @@
 package com.sebast.comercializados_leon.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sebast.comercializados_leon.Model.Entity.Producto;
+
+import jakarta.persistence.LockModeType;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     List<Producto> findByCodigoStartingWithIgnoreCase(String prefijo);
 
     List<Producto> findAllByOrderByCodigoAsc();
+
+    // Carga el producto bloqueando su fila (SELECT ... FOR UPDATE) hasta que termine la
+    // transaccion. Se usa en todo lo que mueve stock (facturas, traslados, entradas):
+    // dos operaciones al mismo tiempo sobre el mismo producto se hacen una detras de la
+    // otra, y ninguna puede pisar el descuento de la otra.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Producto p WHERE p.id = :id")
+    Optional<Producto> buscarParaActualizar(@Param("id") Long id);
 
     List<Producto> findByStockLessThanEqualOrderByCodigoAsc(Integer stockMaximo);
 

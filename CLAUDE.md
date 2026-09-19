@@ -158,13 +158,17 @@ al abrir el archivo: copiar el script a una ruta sin tildes o pasarlo por stdin.
 
 ## Modelo de datos
 
-Tablas de negocio: `productos`, `clientes`, `facturas`, `detalle_factura`.
+Tablas de negocio: `productos`, `clientes`, `facturas`, `detalle_factura`, `abonos`.
 Tablas de seguridad: `usuarios`, `sesiones` (sin entidades JPA; solo vía funciones `cleon_*`).
 
-- `Producto` — tiene `codigo` único, `stock`, `precio` (BigDecimal 12,2), `categoria`, `marca`
-- `Cliente` — acumula `totalCompras`, que determina los "clientes destacados"
-- `Factura` — tiene estado `EstadoFactura`: `PENDIENTE` | `PAGADA` | `ANULADA`
+- `Producto` — tiene `codigo` único, `stock`, `precio` (BigDecimal 12,2), `categoria`, `marca`,
+  `stockCamion` y `stockBodega` (ver "Inventarios" abajo)
+- `Cliente` — acumula `totalCompras`, que determina los "clientes destacados"; tiene `ciudad`
+  (texto libre, opcional) y `nivelPrecio` (lista de precios 1, 2 o 3)
+- `Factura` — tiene estado `EstadoFactura`: `PENDIENTE` | `PAGADA` | `ANULADA`, `origen`
+  (`OrigenVenta`: `GENERAL` | `CAMION`), el `nivelPrecio` con el que se facturó y `totalPagado`
 - `DetalleFactura` — líneas de la factura, con precio unitario congelado al momento de la venta
+- `Abono` — cada pago de una factura (relación de un solo lado hacia `Factura`)
 
 Hibernate está en **`ddl-auto=validate`**: comprueba que las entidades coincidan con las tablas
 pero **no las crea ni las modifica** (cleon_app no tiene permiso). Al agregar o cambiar un campo
@@ -189,6 +193,41 @@ en una entidad hay que escribir el `ALTER TABLE` en un script de `db/`, ejecutar
 - El umbral de "stock bajo" se define **una sola vez** en
   `ProductoService.STOCK_BAJO_POR_DEFECTO` y el frontend lo lee desde
   `GET /api/productos/opciones`. No repetirlo como número fijo en el JS.
+
+### Inventarios: local, camión y bodega
+
+- `stock` es el **stock general** y **incluye lo cargado en el camión**. `stockCamion` es la
+  parte de ese stock que va en el camión (la base exige `stock_camion <= stock`).
+  Lo que está en el local es `stock - stockCamion` (`Producto.stockEnLocal()`).
+- Vender desde **General** solo puede usar lo del local; vender desde **Camión** descuenta de
+  `stockCamion` y de `stock`. Anular devuelve las unidades a donde salieron.
+- `stockBodega` es un inventario **aparte**: no cuenta en el general y no se factura.
+- Los traslados (`POST /api/productos/{id}/traslados`) mueven entre `GENERAL`, `CAMION` y
+  `BODEGA` (enum `Almacen`). General ↔ Camión no cambia `stock`; todo lo que entra o sale de
+  la bodega sí. Las reglas de cada movimiento están **solo** en `ProductoService`
+  (`disponibleEn`, `quitarDe`, `ponerEn`); no repetirlas en otro lado.
+- `POST /api/productos/{id}/entradas` suma unidades nuevas al general o a la bodega (botón "+").
+  Al camión no: se carga con un traslado.
+- Todo lo que mueve stock carga el producto con `buscarParaActualizar` (`SELECT ... FOR UPDATE`)
+  para que dos operaciones simultáneas no se pisen. Al bloquear varios productos, siempre en
+  orden de id (evita deadlocks).
+
+### Listas de precios, facturas y abonos
+
+- Lista 1 = `precio` del producto. Lista 2 = lista 1 + `ProductoService.RECARGO_NIVEL_2` %
+  (redondeado al peso; el frontend lo lee de `/api/productos/opciones` como `recargoNivel2`).
+  Lista 3 = precio libre: se escribe en cada línea de la factura (`precioUnitario`).
+- En las listas 1 y 2 el backend **ignora** el precio que mande el frontend y lo calcula él.
+- Al crear una factura, precios, stock y el tope del total se validan **antes** del
+  `saveAndFlush`: así un error no gasta un número de factura. Todas las facturas (general y
+  camión) comparten la misma numeración (el id); el origen solo sirve para filtrar.
+- **Abonos:** no pueden superar lo que falta. Cuando `totalPagado` llega al total la factura
+  pasa a `PAGADA` (y recién ahí se suma a `totalCompras`, igual que con "Marcar pagada").
+  "Marcar pagada" registra lo que faltaba como un abono, así la suma de abonos = `totalPagado`.
+  Al anular, los abonos quedan registrados. `cleon_app` solo tiene `SELECT, INSERT` sobre `abonos`.
+- **Factura en curso:** el frontend la guarda en `sessionStorage` (`cleon.facturaBorrador`) solo
+  con ids, cantidades y precios libres; nombres y precios se toman siempre del inventario actual.
+  Se borra al crearla o al cerrar sesión. Lo leído de ahí se valida campo por campo.
 
 ## Trampas conocidas
 
@@ -235,8 +274,10 @@ en una entidad hay que escribir el `ALTER TABLE` en un script de `db/`, ejecutar
 
 ## Estado actual y pendientes conocidos
 
-- **Rama local `respaldo-historial-viejo`**: guarda el historial anterior, que contiene la
-  contraseña vieja (ya cambiada) de `postgres`. Nunca subirla (`git push --all` la subiría).
+- **Migración pendiente de aplicar**: `db/migracion_camion_bodega_abonos.sql` (camión, bodega,
+  listas de precios, ciudades y abonos). Sin ella el backend nuevo no arranca. Aplicarla como
+  `postgres` en el PC y como el dueño de la base en Neon (`cleon_owner`) **antes** de subir el backend.
+
 - **Acceso controlado a carpetas de Windows**: algunos programas (pg_dump, mkcert, python,
   editores externos) no pueden escribir dentro de `Documents`. PowerShell sí. Generar archivos
   fuera y copiarlos, o permitir la aplicación en Seguridad de Windows.

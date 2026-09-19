@@ -16,8 +16,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// id y codigo solo viajan en las respuestas: al crear o actualizar se ignoran
-// (el codigo lo genera el backend y no se puede editar).
+// id, codigo y stockCamion solo viajan en las respuestas: al crear o actualizar se
+// ignoran (el codigo lo genera el backend y no se puede editar; el camion se llena
+// con traslados desde el inventario general).
 @Data
 // @JsonCreator en el constructor vacio: Jackson 3 (Spring Boot 4) usaria si no el
 // constructor con todos los argumentos y se saltaria los setters que limpian el texto.
@@ -54,6 +55,13 @@ public class ProductoDTO {
     @NotBlank(message = "La marca es obligatoria")
     @Size(max = 30, message = "Marca invalida")
     private String marca;
+
+    private Integer stockCamion;
+
+    // Opcional: al crear, vacio = 0; al actualizar, vacio = no se cambia.
+    @PositiveOrZero(message = "El stock de bodega no puede ser negativo")
+    @Max(value = 1_000_000, message = "El stock de bodega no puede superar 1.000.000 unidades")
+    private Integer stockBodega;
 
     // Setters propios: Jackson los usa al leer el JSON, asi que todo texto llega ya
     // normalizado a la validacion. Lombok no genera los que ya existen.

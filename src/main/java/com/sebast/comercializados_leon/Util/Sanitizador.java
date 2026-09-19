@@ -42,6 +42,15 @@ public final class Sanitizador {
         return limpio.isEmpty() ? null : limpio;
     }
 
+    // Clave para comparar textos sin importar mayusculas ni tildes ("Medellín" = "medellin").
+    public static String claveSinTildes(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String sinMarcas = Normalizer.normalize(valor, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return sinMarcas.toLowerCase(java.util.Locale.ROOT);
+    }
+
     // Escapa los comodines de LIKE (% y _) para que una busqueda los trate como texto
     // literal. Va con ESCAPE '\' en la consulta (ver ProductoRepository.buscarConFiltros).
     public static String escaparLike(String valor) {

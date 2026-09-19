@@ -18,7 +18,8 @@
 --      Si alguien llega a la base saltandose el login, no ve ni cambia nada.
 --
 -- Ejecutar como el dueno de las tablas (postgres en el PC, neondb_owner en Neon),
--- despues de schema.sql:
+-- despues de schema.sql (en una base que ya existia, despues de sus migraciones:
+-- la tabla abonos tiene que existir):
 --   psql -U postgres -d cleon -v app_password='CONTRASENA_DE_CLEON_APP' -f db/seguridad.sql
 -- Esa misma contrasena va en config/secretos.properties (CLEON_DB_PASSWORD).
 -- Despues, crear el usuario admin con db/admin.sql.
@@ -264,22 +265,22 @@ GRANT EXECUTE ON FUNCTION public.cleon_es_admin(),
 -- ----------------------------------------------------------------------------
 -- 3. Privilegios minimos sobre las tablas
 -- ----------------------------------------------------------------------------
--- Solo lo que la aplicacion usa. Las facturas y sus lineas nunca se borran ni se
--- editan (se anulan), asi que cleon_app no tiene DELETE sobre ellas: ni un error en
+-- Solo lo que la aplicacion usa. Las facturas, sus lineas y sus abonos nunca se borran
+-- ni se editan (se anulan), asi que cleon_app no tiene DELETE sobre ellas: ni un error en
 -- el codigo ni un atacante con acceso a la aplicacion puede hacer desaparecer ventas.
 -- Si en el futuro una funcion nueva necesita otro permiso, se agrega aqui.
 
 REVOKE ALL ON public.productos, public.clientes, public.facturas, public.detalle_factura,
-              public.usuarios, public.sesiones
+              public.abonos, public.usuarios, public.sesiones
     FROM PUBLIC, cleon_app;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.productos, public.clientes TO cleon_app;
 GRANT SELECT, INSERT, UPDATE         ON public.facturas                   TO cleon_app;
-GRANT SELECT, INSERT                 ON public.detalle_factura            TO cleon_app;
+GRANT SELECT, INSERT                 ON public.detalle_factura, public.abonos TO cleon_app;
 
 -- Las columnas id usan secuencias (BIGSERIAL); insertar necesita poder avanzarlas.
 SELECT format('GRANT USAGE ON SEQUENCE %s TO cleon_app', pg_get_serial_sequence('public.' || t, 'id'))
-FROM unnest(ARRAY['productos', 'clientes', 'facturas', 'detalle_factura']) AS t \gexec
+FROM unnest(ARRAY['productos', 'clientes', 'facturas', 'detalle_factura', 'abonos']) AS t \gexec
 
 -- usuarios y sesiones: cleon_app no tiene ningun permiso directo. Solo las funciones
 -- de arriba (que corren como el dueno) pueden tocarlas.
@@ -297,7 +298,7 @@ DO $$
 DECLARE
     t TEXT;
 BEGIN
-    FOREACH t IN ARRAY ARRAY['productos', 'clientes', 'facturas', 'detalle_factura'] LOOP
+    FOREACH t IN ARRAY ARRAY['productos', 'clientes', 'facturas', 'detalle_factura', 'abonos'] LOOP
         EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
         EXECUTE format('ALTER TABLE public.%I NO FORCE ROW LEVEL SECURITY', t);
         EXECUTE format('DROP POLICY IF EXISTS solo_admin ON public.%I', t);

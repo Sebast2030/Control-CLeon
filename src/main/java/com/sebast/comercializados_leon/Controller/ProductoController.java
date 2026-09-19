@@ -15,7 +15,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
+import com.sebast.comercializados_leon.Model.Dto.EntradaStockRequest;
 import com.sebast.comercializados_leon.Model.Dto.ProductoDTO;
+import com.sebast.comercializados_leon.Model.Dto.TrasladoRequest;
 import com.sebast.comercializados_leon.Service.ProductoService;
 import com.sebast.comercializados_leon.Util.Sanitizador;
 
@@ -51,13 +53,15 @@ public class ProductoController {
     }
 
     // Opciones fijas para los menus desplegables de categoria y marca en el frontend,
-    // mas el umbral de stock bajo para que el frontend no lo repita por su cuenta.
+    // mas el umbral de stock bajo y el recargo de la lista de precios 2, para que el
+    // frontend no los repita por su cuenta.
     @GetMapping("/opciones")
     public Map<String, Object> opciones() {
         return Map.of(
                 "categorias", productoService.categoriasDisponibles(),
                 "marcas", productoService.marcasDisponibles(),
-                "stockBajo", ProductoService.STOCK_BAJO_POR_DEFECTO
+                "stockBajo", ProductoService.STOCK_BAJO_POR_DEFECTO,
+                "recargoNivel2", ProductoService.RECARGO_NIVEL_2
         );
     }
 
@@ -76,6 +80,20 @@ public class ProductoController {
     public ProductoDTO actualizar(@PathVariable @Positive(message = "Id invalido") Long id,
                                   @Valid @RequestBody ProductoDTO productoDTO) {
         return productoService.actualizar(id, productoDTO);
+    }
+
+    // Sumar unidades nuevas al inventario general o a la bodega (boton "+").
+    @PostMapping("/{id}/entradas")
+    public ProductoDTO agregarUnidades(@PathVariable @Positive(message = "Id invalido") Long id,
+                                       @Valid @RequestBody EntradaStockRequest request) {
+        return productoService.agregarUnidades(id, request);
+    }
+
+    // Mover unidades entre el local, el camion y la bodega.
+    @PostMapping("/{id}/traslados")
+    public ProductoDTO trasladar(@PathVariable @Positive(message = "Id invalido") Long id,
+                                 @Valid @RequestBody TrasladoRequest request) {
+        return productoService.trasladar(id, request);
     }
 
     @DeleteMapping("/{id}")

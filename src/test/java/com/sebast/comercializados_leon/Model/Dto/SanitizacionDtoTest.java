@@ -35,6 +35,29 @@ class SanitizacionDtoTest {
     }
 
     @Test
+    void facturaYTrasladoLeenSusEnumsDesdeJson() {
+        FacturaCreateRequest factura = mapper.readValue("""
+                {"clienteId":1,"origen":"CAMION","items":[{"productoId":2,"cantidad":3,"precioUnitario":150000}]}
+                """, FacturaCreateRequest.class);
+        assertThat(factura.getOrigen()).isEqualTo(com.sebast.comercializados_leon.Model.Entity.OrigenVenta.CAMION);
+        assertThat(factura.getItems().get(0).getPrecioUnitario()).isEqualByComparingTo("150000");
+
+        AbonoRequest abono = mapper.readValue("{\"monto\":25000}", AbonoRequest.class);
+        assertThat(abono.getMonto()).isEqualByComparingTo("25000");
+
+        ClienteDTO cliente = mapper.readValue("{\"nombre\":\"Ana\",\"ciudad\":\"  Santa   Marta \",\"nivelPrecio\":2}", ClienteDTO.class);
+        assertThat(cliente.getCiudad()).isEqualTo("Santa Marta");
+        assertThat(cliente.getNivelPrecio()).isEqualTo(2);
+    }
+
+    @Test
+    void unAlmacenInventadoSeRechaza() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> mapper.readValue(
+                "{\"origen\":\"CASA\",\"destino\":\"BODEGA\",\"cantidad\":1}", TrasladoRequest.class))
+                .isInstanceOf(tools.jackson.core.JacksonException.class);
+    }
+
+    @Test
     void laContrasenaNoSeModifica() {
         LoginRequest dto = mapper.readValue("""
                 {"usuario":" Admin_Cleon#2026 ","password":"  con  espacios  "}

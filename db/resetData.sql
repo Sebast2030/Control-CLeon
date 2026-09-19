@@ -1,10 +1,10 @@
 -- ==========================================================
 -- Comercializadora Leon - Vaciar todos los datos
--- CUIDADO: esto borra TODOS los registros de las 4 tablas.
+-- CUIDADO: esto borra TODOS los registros de las 5 tablas.
 -- La estructura (tablas, columnas, CHECK, indices) NO se borra.
 -- ==========================================================
 
-TRUNCATE TABLE detalle_factura, facturas, clientes, productos
+TRUNCATE TABLE abonos, detalle_factura, facturas, clientes, productos
     RESTART IDENTITY CASCADE;
 
 -- RESTART IDENTITY: reinicia los contadores de id (BIGSERIAL) para que

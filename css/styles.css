@@ -895,7 +895,7 @@ td.actions {
 
 .factura-row:hover { background: var(--yellow-pale); }
 
-.factura-detalle-row td {
+.factura-detalle-row > td {
   background: var(--paper);
   padding: 0;
   border-bottom: 1px solid var(--line-soft);
@@ -972,6 +972,181 @@ td.actions {
 .stepper-btn:hover { background: var(--yellow-pale); color: var(--ink); }
 .stepper-btn:first-child { border-bottom: 1px solid var(--line); }
 .stepper-btn .icon { width: 13px; height: 13px; }
+
+/* ---------- Factura: origen, precio por lista, abonos ---------- */
+
+/* Selector General / Camion */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border: none;
+  background: var(--white);
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.segmented-btn + .segmented-btn { border-left: 1.5px solid var(--line); }
+.segmented-btn .icon { width: 16px; height: 16px; }
+.segmented-btn:hover { background: var(--yellow-pale); color: var(--ink); }
+.segmented-btn.active { background: var(--ink); color: var(--yellow); }
+
+.field-hint {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  margin: 6px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.field .field-label-row label { margin-bottom: 0; }
+
+.mini-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.item-row.item-row-precio {
+  grid-template-columns: 90px 1fr auto;
+  margin-top: 8px;
+}
+
+.item-row-precio .input { width: 100%; }
+
+/* Precio bloqueado (listas 1 y 2): gris para que se note que no se puede cambiar */
+.money-input.bloqueado {
+  background: #ECEAE4;
+  border-color: #D6D1C4;
+}
+
+.money-input.bloqueado input {
+  color: var(--ink-soft);
+  font-weight: 600;
+  cursor: not-allowed;
+  -webkit-text-fill-color: var(--ink-soft);
+}
+
+.money-input-sm { margin-top: 6px; max-width: 190px; }
+.money-input-sm input { padding: 5px 8px; font-size: 13px; }
+.money-input-sm .money-prefix { padding: 0 8px; font-size: 13px; }
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.badge .icon { width: 13px; height: 13px; }
+.badge-general { color: var(--ink-soft); background: var(--line-soft); border-color: var(--line); }
+.badge-camion { color: #1F4E79; background: #E6EFF8; border-color: #C3D6EA; }
+.badge-dias { color: var(--ink-soft); background: var(--white); border-color: var(--line); }
+.badge-dias.alerta { color: var(--danger); background: var(--danger-bg); border-color: #EAC9C3; }
+.badge-nivel { color: var(--ink-soft); background: var(--white); border-color: var(--line); }
+.badge-nivel.nivel-2 { color: #8A6A0A; background: var(--yellow-pale); border-color: var(--yellow-deep); }
+.badge-nivel.nivel-3 { color: var(--white); background: var(--ink); border-color: var(--ink); }
+
+.estado-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+td.pagado-parcial { color: var(--success); font-weight: 600; }
+
+/* Fecha en dos renglones como mucho ("19 sep 2026," / "1:14 a.m."), no en cuatro */
+td.fecha { min-width: 118px; }
+
+/* Acciones del historial: bajan de renglon en vez de obligar a desplazarse de lado */
+td.actions-wrap { white-space: normal; }
+
+.acciones-factura {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.summary-line {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: -8px 0 16px;
+}
+
+.modal-product {
+  margin: 0 0 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.abono-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.abono-resumen > div {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.abono-resumen span { display: block; font-size: 12px; color: var(--ink-faint); }
+.abono-resumen strong { font-size: 15px; color: var(--ink); }
+
+.detalle-meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+
+.detalle-subtitulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin: 16px 0 8px;
+  color: var(--ink-soft);
+}
+
+.detalle-subtitulo .icon { width: 15px; height: 15px; }
+
+/* Credito al pie de la barra lateral */
+.sidebar-credit {
+  display: block;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--sidebar-text-dim);
+}
 
 /* ---------- Utilidades ---------- */
 
@@ -1219,6 +1394,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
   .item-row { grid-template-columns: 1fr; }
   .item-row .btn { justify-content: center; }
+  .item-row.item-row-precio { grid-template-columns: 80px 1fr auto; }
+  .abono-resumen { grid-template-columns: 1fr; }
 
   .modal { width: calc(100vw - 32px); }
 }

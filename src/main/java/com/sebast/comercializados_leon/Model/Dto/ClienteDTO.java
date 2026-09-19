@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sebast.comercializados_leon.Util.Sanitizador;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -42,6 +44,17 @@ public class ClienteDTO {
     @Pattern(regexp = Sanitizador.EMAIL, message = "El email no es valido")
     private String email;
 
+    //Opcional. Texto libre.
+    @Size(min = 2, max = 80, message = "La ciudad debe tener entre 2 y 80 caracteres")
+    @Pattern(regexp = Sanitizador.TEXTO, message = "La ciudad tiene caracteres no permitidos")
+    private String ciudad;
+
+    // Lista de precios: 1 = precio base, 2 = base + recargo, 3 = precio libre.
+    // Vacio = 1 al crear; al actualizar, vacio = no se cambia.
+    @Min(value = 1, message = "El nivel de precios debe ser 1, 2 o 3")
+    @Max(value = 3, message = "El nivel de precios debe ser 1, 2 o 3")
+    private Integer nivelPrecio;
+
     private BigDecimal totalCompras;
 
     // Se calcula al paso (no se guarda en BD): true si esta entre los clientes destacados
@@ -64,6 +77,10 @@ public class ClienteDTO {
 
     public void setEmail(String email) {
         this.email = Sanitizador.limpiar(email);
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = Sanitizador.limpiar(ciudad);
     }
 
 }

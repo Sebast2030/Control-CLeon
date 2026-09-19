@@ -121,12 +121,21 @@ const Api = {
     crear: (dto) => apiRequest('/productos', { method: 'POST', body: JSON.stringify(dto) }),
     actualizar: (id, dto) => apiRequest(`/productos/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(dto) }),
     eliminar: (id) => apiRequest(`/productos/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    // almacen: 'GENERAL' o 'BODEGA'
+    agregarUnidades: (id, almacen, cantidad) => apiRequest(`/productos/${encodeURIComponent(id)}/entradas`, {
+      method: 'POST', body: JSON.stringify({ almacen, cantidad }),
+    }),
+    // dto: { origen, destino, cantidad } con 'GENERAL' | 'CAMION' | 'BODEGA'
+    trasladar: (id, dto) => apiRequest(`/productos/${encodeURIComponent(id)}/traslados`, {
+      method: 'POST', body: JSON.stringify(dto),
+    }),
   },
 
   // ---- Clientes ----
   clientes: {
     listar: (nombre) => apiRequest(`/clientes${nombre ? `?nombre=${encodeURIComponent(nombre)}` : ''}`),
     destacados: () => apiRequest('/clientes/destacados'),
+    ciudades: () => apiRequest('/clientes/ciudades'),
     crear: (dto) => apiRequest('/clientes', { method: 'POST', body: JSON.stringify(dto) }),
     actualizar: (id, dto) => apiRequest(`/clientes/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(dto) }),
     eliminar: (id) => apiRequest(`/clientes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
@@ -134,10 +143,11 @@ const Api = {
 
   // ---- Facturas ----
   facturas: {
-    listar: ({ clienteId, estado, ordenarPor } = {}) => {
+    listar: ({ clienteId, estado, origen, ordenarPor } = {}) => {
       const params = new URLSearchParams();
       if (clienteId) params.set('clienteId', clienteId);
       if (estado) params.set('estado', estado);
+      if (origen) params.set('origen', origen);
       if (ordenarPor) params.set('ordenarPor', ordenarPor);
       const qs = params.toString();
       return apiRequest(`/facturas${qs ? `?${qs}` : ''}`);
@@ -145,6 +155,9 @@ const Api = {
     obtener: (id) => apiRequest(`/facturas/${encodeURIComponent(id)}`),
     crear: (dto) => apiRequest('/facturas', { method: 'POST', body: JSON.stringify(dto) }),
     pagar: (id) => apiRequest(`/facturas/${encodeURIComponent(id)}/pagar`, { method: 'PUT' }),
+    abonar: (id, monto) => apiRequest(`/facturas/${encodeURIComponent(id)}/abonos`, {
+      method: 'POST', body: JSON.stringify({ monto }),
+    }),
     anular: (id) => apiRequest(`/facturas/${encodeURIComponent(id)}/anular`, { method: 'PUT' }),
   },
 };

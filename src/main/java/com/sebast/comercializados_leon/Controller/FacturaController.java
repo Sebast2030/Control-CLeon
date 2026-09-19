@@ -1,5 +1,6 @@
 package com.sebast.comercializados_leon.Controller;
 
+import com.sebast.comercializados_leon.Model.Dto.AbonoRequest;
 import com.sebast.comercializados_leon.Model.Dto.FacturaCreateRequest;
 import com.sebast.comercializados_leon.Model.Dto.FacturaDTO;
 import com.sebast.comercializados_leon.Service.FacturaService;
@@ -31,14 +32,15 @@ public class FacturaController {
 
     private final FacturaService facturaService;
 
-    // estado y ordenarPor ademas se validan contra su lista de valores en FacturaService.
+    // estado, origen y ordenarPor ademas se validan contra su lista de valores en FacturaService.
     @GetMapping
     public List<FacturaDTO> listar(
             @RequestParam(required = false) @Positive(message = "Cliente invalido") Long clienteId,
             @RequestParam(required = false) @Size(max = 20, message = "Estado invalido") String estado,
+            @RequestParam(required = false) @Size(max = 20, message = "Origen invalido") String origen,
             @RequestParam(required = false) @Size(max = 20, message = "Orden invalido") String ordenarPor
     ) {
-        return facturaService.listarFiltradas(estado, clienteId, ordenarPor);
+        return facturaService.listarFiltradas(estado, clienteId, origen, ordenarPor);
     }
 
     @GetMapping("/{id}")
@@ -55,6 +57,13 @@ public class FacturaController {
     @PutMapping("/{id}/pagar")
     public FacturaDTO pagar(@PathVariable @Positive(message = "Id invalido") Long id) {
         return facturaService.pagar(id);
+    }
+
+    // Pago parcial. Si completa el total, la factura queda pagada.
+    @PostMapping("/{id}/abonos")
+    public FacturaDTO abonar(@PathVariable @Positive(message = "Id invalido") Long id,
+                             @Valid @RequestBody AbonoRequest request) {
+        return facturaService.abonar(id, request);
     }
 
     @PutMapping("/{id}/anular")

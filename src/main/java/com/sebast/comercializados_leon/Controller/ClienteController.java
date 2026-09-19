@@ -46,6 +46,12 @@ public class ClienteController {
         return clienteService.listarDestacados();
     }
 
+    // Ciudades donde ya hay clientes, para sugerirlas al crear uno y filtrar al facturar.
+    @GetMapping("/ciudades")
+    public List<String> listarCiudades() {
+        return clienteService.listarCiudades();
+    }
+
     @GetMapping("/{id}")
     public ClienteDTO obtener(@PathVariable @Positive(message = "Id invalido") Long id) {
         return clienteService.obtenerPorId(id);
