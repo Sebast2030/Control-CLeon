@@ -235,12 +235,8 @@ en una entidad hay que escribir el `ALTER TABLE` en un script de `db/`, ejecutar
 
 ## Estado actual y pendientes conocidos
 
-- **Renombrado sin commitear**: el proyecto ya se llama `comercializados_leon` en todas
-  partes (paquete, `pom.xml`, clase principal, tests), pero git todavía ve el paquete
-  viejo `alamcenamiento_leon` como borrado y el nuevo como sin trackear. Falta el commit.
-- **Contraseña vieja de `postgres` en el historial de git**: estuvo en `application.properties`
-  (con push a `origin/main`). Ya no se usa en la app, pero hay que rotarla
-  (`ALTER ROLE postgres PASSWORD '...'`); borrarla del archivo no la saca del historial.
+- **Rama local `respaldo-historial-viejo`**: guarda el historial anterior, que contiene la
+  contraseña vieja (ya cambiada) de `postgres`. Nunca subirla (`git push --all` la subiría).
 - **Acceso controlado a carpetas de Windows**: algunos programas (pg_dump, mkcert, python,
   editores externos) no pueden escribir dentro de `Documents`. PowerShell sí. Generar archivos
   fuera y copiarlos, o permitir la aplicación en Seguridad de Windows.
