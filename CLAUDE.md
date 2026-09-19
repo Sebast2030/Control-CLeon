@@ -110,16 +110,20 @@ Flujo estricto en tres capas: **Controller → Service → Repository**.
 
 ### Producción
 
-Guía paso a paso en [DESPLIEGUE.md](DESPLIEGUE.md): base en **Neon**, backend en **Render**
-(con el `Dockerfile`, perfil `prod` en `application-prod.properties`) y frontend en
-**Cloudflare Pages** (cabeceras de seguridad en `_headers`).
+Guía paso a paso en [DESPLIEGUE.md](DESPLIEGUE.md): dominio `comercializadosleon.com` en
+**Cloudflare**, base en **Neon**, backend en **Render** (`api.comercializadosleon.com`, con el
+`Dockerfile`, perfil `prod` en `application-prod.properties`) y frontend en **Cloudflare Pages**
+(`comercializadosleon.com` y `www.`, cabeceras de seguridad en `_headers`).
 
 - La configuración de producción llega por variables de entorno de Render: `CLEON_DB_URL`,
   `CLEON_DB_PASSWORD`, `CLEON_CORS_ORIGENES`. Nunca en archivos del repo, que es **público**.
-- `js/api.js` elige la API según dónde se abra la página: `*.pages.dev` → Render; si no, el backend local.
+- `js/api.js` elige la API según dónde se abra la página: desde `localhost` o `192.168.x.x` → backend
+  local; desde cualquier otro sitio → `https://api.comercializadosleon.com`.
+- El registro DNS `api` en Cloudflare va en **DNS only** (nube gris): con el proxy de Cloudflare,
+  Render vería la IP de Cloudflare y el rate limiting por IP dejaría de servir.
 - Detrás del proxy de Render, `server.forward-headers-strategy=native` toma la IP real de
   `X-Forwarded-For` solo si viene de la red interna del proxy (el rate limiting depende de eso).
-- Si cambia la dirección de Render, actualizarla en `js/api.js`, `index.html` y `_headers` (CSP).
+- Si cambia la dirección del backend, actualizarla en `js/api.js`, `index.html` y `_headers` (CSP).
 
 ### HTTPS
 

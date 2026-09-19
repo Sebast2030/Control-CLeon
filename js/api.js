@@ -11,11 +11,13 @@
    en Windows: ipconfig (linea "Direccion IPv4").
    ========================================================== */
 
-// Publicado en Cloudflare Pages -> backend en Render.
 // Abierto desde el PC o la red del local (Live Server) -> backend local.
-const API_BASE = window.location.hostname.endsWith('.pages.dev')
-  ? 'https://cleon-api.onrender.com/api'
-  : 'https://192.168.1.12:8080/api';
+// Publicado en comercializadosleon.com -> backend en Render.
+const EN_RED_LOCAL = /^(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3})$/
+  .test(window.location.hostname);
+const API_BASE = EN_RED_LOCAL
+  ? 'https://192.168.1.12:8080/api'
+  : 'https://api.comercializadosleon.com/api';
 
 /* ---------- Sesion ----------
    El token se guarda en sessionStorage: dura mientras la pestaña esté

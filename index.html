@@ -7,12 +7,12 @@
   Content-Security-Policy: el navegador solo ejecuta los scripts de js/ y bloquea
   cualquier script inyectado (XSS). connect-src solo deja llamar a la API por HTTPS
   en el puerto 8080 (de cualquier IP, para no tener que tocarlo si cambia la del PC)
-  y con el backend publicado en Render.
+  y con el backend publicado (api.comercializadosleon.com, en Render).
   El sha256 permite unicamente el script de recarga automatica que inyecta Live
   Server; si una version nueva de Live Server lo cambia, la app sigue funcionando
   pero la recarga automatica deja de andar (se recarga con F5).
 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*:8080 https://cleon-api.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*:8080 https://api.comercializadosleon.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="no-referrer">
 <title>CLeón</title>
 <link rel="icon" type="image/png" href="img/favicon.png?v=2">
