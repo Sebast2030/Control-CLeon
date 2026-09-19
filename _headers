@@ -1,0 +1,11 @@
+# Cabeceras de seguridad que Cloudflare Pages agrega a todas las paginas del frontend.
+# Refuerzan la CSP de index.html y agregan protecciones que una etiqueta <meta> no puede
+# dar (frame-ancestors: nadie puede meter la app dentro de un iframe para engañar clics).
+# Si cambia la direccion del backend en Render, actualizar connect-src aqui y en index.html.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cleon-api.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000

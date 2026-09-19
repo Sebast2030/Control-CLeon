@@ -1,0 +1,12 @@
+# Solo entra a la imagen lo que el Dockerfile copia a proposito.
+# Nunca secretos, certificados, respaldos ni el frontend.
+.git
+.vscode
+target
+config
+db
+css
+js
+img
+*.html
+*.md

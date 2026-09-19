@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+  Content-Security-Policy: el navegador solo ejecuta los scripts de js/ y bloquea
+  cualquier script inyectado (XSS). connect-src solo deja llamar a la API por HTTPS
+  en el puerto 8080 (de cualquier IP, para no tener que tocarlo si cambia la del PC)
+  y con el backend publicado en Render.
+  El sha256 permite unicamente el script de recarga automatica que inyecta Live
+  Server; si una version nueva de Live Server lo cambia, la app sigue funcionando
+  pero la recarga automatica deja de andar (se recarga con F5).
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*:8080 https://cleon-api.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="no-referrer">
+<title>CLeón</title>
+<link rel="icon" type="image/png" href="img/favicon.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Inicio de sesion: es lo unico visible hasta que haya una sesion valida -->
+<div class="login-screen" id="login-screen" hidden>
+  <div class="login-card">
+    <div class="login-brand">
+      <img src="img/logo.png" alt="CLeón — mufflers' technology">
+    </div>
+    <h1 class="login-title">Iniciar sesión</h1>
+    <p class="login-subtitle">Sistema de inventario y facturación</p>
+
+    <form id="login-form" novalidate autocomplete="off">
+      <div class="field">
+        <label for="login-usuario">Usuario</label>
+        <input class="input" id="login-usuario" name="usuario" autocomplete="off"
+               autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="50" required>
+      </div>
+      <div class="field">
+        <label for="login-password">Contraseña</label>
+        <div class="password-box">
+          <input class="input" id="login-password" name="password" type="password"
+                 autocomplete="off" maxlength="72" required>
+          <button type="button" class="password-toggle" id="login-ver-password" aria-label="Mostrar contraseña">
+            <span class="icon" data-icon="eye"></span>
+          </button>
+        </div>
+      </div>
+      <div class="login-error" id="login-error" role="alert" hidden></div>
+      <button type="submit" class="btn btn-primary login-submit" id="login-submit">
+        <span class="icon" data-icon="lock"></span> Entrar
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="layout" id="layout" hidden>
+
+  <!-- Barra superior movil (solo visible en pantallas angostas) -->
+  <div class="mobile-topbar">
+    <img src="img/logo.png" alt="CLeón" class="mobile-topbar-logo">
+    <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú">
+      <span class="icon" data-icon="menu"></span>
+    </button>
+  </div>
+
+  <!-- Fondo oscuro detras del menu movil abierto -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <!-- Barra lateral -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-plate">
+        <img src="img/logo.png" alt="CLeón — mufflers' technology">
+      </div>
+      <div class="brand-tagline">Sistema de inventario</div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <!-- Dashboard: item unico -->
+      <a href="#/dashboard" class="nav-item-single" data-route="dashboard">
+        <span class="icon" data-icon="dashboard"></span> Dashboard
+      </a>
+
+      <!-- Grupo: Inventario -->
+      <div class="nav-group" data-group="inventario">
+        <button type="button" class="nav-group-toggle" data-toggle="inventario">
+          <span class="icon" data-icon="box"></span> Inventario
+          <span class="icon nav-group-chevron" data-icon="chevron"></span>
+        </button>
+        <div class="nav-group-body">
+          <a href="#/productos" class="nav-sublink" data-route="productos">Todos los productos</a>
+          <a href="#/productos/stock-bajo" class="nav-sublink" data-route="productos-stock-bajo">Stock bajo</a>
+        </div>
+      </div>
+
+      <!-- Grupo: Clientes -->
+      <div class="nav-group" data-group="clientes">
+        <button type="button" class="nav-group-toggle" data-toggle="clientes">
+          <span class="icon" data-icon="users"></span> Clientes
+          <span class="icon nav-group-chevron" data-icon="chevron"></span>
+        </button>
+        <div class="nav-group-body">
+          <a href="#/clientes" class="nav-sublink" data-route="clientes">Todos los clientes</a>
+          <a href="#/clientes/destacados" class="nav-sublink" data-route="destacados">Destacados</a>
+        </div>
+      </div>
+
+      <!-- Grupo: Facturacion -->
+      <div class="nav-group" data-group="facturacion">
+        <button type="button" class="nav-group-toggle" data-toggle="facturacion">
+          <span class="icon" data-icon="receipt"></span> Facturación
+          <span class="icon nav-group-chevron" data-icon="chevron"></span>
+        </button>
+        <div class="nav-group-body">
+          <a href="#/facturacion/nueva" class="nav-sublink" data-route="facturacion-nueva">Nueva factura</a>
+          <a href="#/facturacion/historial" class="nav-sublink" data-route="facturacion-historial">Historial</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <span class="icon" data-icon="user"></span>
+        <span class="sidebar-user-name" id="sidebar-usuario"></span>
+      </div>
+      <button type="button" class="btn-logout" id="btn-logout">
+        <span class="icon" data-icon="logout"></span> Cerrar sesión
+      </button>
+      <span id="api-status" class="api-status">Verificando conexión…</span>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main">
+    <div id="app"></div>
+  </main>
+
+</div>
+
+<!-- Contenedor de notificaciones -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Contenedor de modales -->
+<div id="modal-root"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
